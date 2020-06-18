@@ -1,0 +1,28 @@
+{
+    "name": "game-of-life",
+    "version": "0.0.0",
+    "description": "Yet another Game of Life implementation in TypeScript",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bmind12/game-of-life.git"
+    },
+    "keywords": [
+        "game-of-life",
+        "typescirpt"
+    ],
+    "author": "Sergey Ryabov",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/bmind12/game-of-life/issues"
+    },
+    "homepage": "https://github.com/bmind12/game-of-life#readme",
+    "devDependencies": {
+        "eslint": "7.2.0",
+        "eslint-config-prettier": "6.11.0",
+        "husky": "4.2.5",
+        "lint-staged": "10.2.11",
+        "prettier": "2.0.5",
+        "semantic-release": "17.0.8"
+    }
+}
