@@ -1,25 +1,32 @@
+interface Field {
+    [height: number]: {
+        [width: number]: boolean
+    }
+}
+
 class GameOfLife {
-    public field: Array<Array<boolean>>
+    public field: Field
 
     constructor(size: number)
     constructor(height: number, width?: number)
-    constructor(height: number, width?: number) {
+    constructor(height: number, width = height) {
         this.field = this.generateField(height, width)
     }
 
-    private generateField(size: number): Array<Array<boolean>>
-    private generateField(height: number, width?: number): Array<Array<boolean>>
-    private generateField(
-        height: number,
-        width?: number
-    ): Array<Array<boolean>> {
-        if (!width) {
-            return Array(height).fill(Array(height).fill(this.getRandomValue()))
+    private generateField(size: number): Field
+    private generateField(height: number, width?: number): Field
+    private generateField(height: number, width = height): Field {
+        const field: Field = {}
+
+        for (let i = 0; i < height; i++) {
+            field[i] = {}
+
+            for (let j = 0; j < width; j++) {
+                field[i][j] = this.getRandomValue()
+            }
         }
 
-        return [...Array(height)].map((_) =>
-            [...Array(width)].map((_) => this.getRandomValue())
-        )
+        return field
     }
 
     private getRandomValue(): boolean {
@@ -27,4 +34,4 @@ class GameOfLife {
     }
 }
 
-const game = new GameOfLife(10, 5)
+const game = new GameOfLife(5)
