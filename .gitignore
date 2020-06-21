@@ -2,3 +2,4 @@ node_modules
 *.log
 dist
 public/build
+.DS_Store
