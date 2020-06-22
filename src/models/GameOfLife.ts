@@ -13,9 +13,10 @@ interface NeighbourCells {
 
 class GameOfLife {
     public field: Field
-    private gameSpeed = 100
+    private gameSpeed = 2000
     private lastRow: number
     private lastColumn: number
+    private neighbourCells: Map<string, NeighbourCells> = new Map()
 
     constructor(size: number)
     constructor(height: number, width?: number)
@@ -40,18 +41,18 @@ class GameOfLife {
 
             for (const column of Object.keys(this.field[row])) {
                 const cell = this.field[row][column]
-                const neighbours = this.getNeighbours(+row, +column)
-                const liveNeighbours = neighbours.filter(
+                const neighbours = this.getNeighbours(row, column)
+                const aliveNeighbours = neighbours.filter(
                     (neighbour) => neighbour
                 ).length
                 let newCell = false
 
                 if (cell) {
-                    if (liveNeighbours === 2 || liveNeighbours === 3) {
+                    if (aliveNeighbours === 2 || aliveNeighbours === 3) {
                         newCell = true
                     }
                 } else {
-                    if (liveNeighbours === 3) {
+                    if (aliveNeighbours === 3) {
                         newCell = true
                     }
                 }
@@ -63,36 +64,48 @@ class GameOfLife {
         return newField
     }
 
-    private getNeighbours(row: number, column: number): Array<boolean> {
+    private getNeighbours(row: string, column: string): Array<boolean> {
         const {
             rowAbove,
             rowBelow,
             columnLeft,
             columnRight
-        } = this.getNeighbourCells(row, column)
+        } = this.getNeighbourCells(+row, +column)
 
         const neighbours = [
             this.field[rowAbove][columnLeft],
             this.field[rowAbove][column],
             this.field[rowAbove][columnRight],
+            this.field[row][columnLeft],
+            this.field[row][columnRight],
             this.field[rowBelow][columnLeft],
             this.field[rowBelow][column],
-            this.field[rowBelow][columnRight],
-            this.field[row][columnLeft],
-            this.field[row][columnRight]
+            this.field[rowBelow][columnRight]
         ]
 
         return neighbours
     }
 
-    // TODO: cache this
     private getNeighbourCells(row: number, column: number): NeighbourCells {
+        const id = `${row}${column}`
+        let neighbourCells = this.neighbourCells.get(id)
+
+        if (neighbourCells) return neighbourCells as NeighbourCells
+
         const rowAbove = row - 1 < 0 ? this.lastRow : row - 1
         const rowBelow = row + 1 > this.lastRow ? 0 : row + 1
         const columnLeft = column - 1 < 0 ? this.lastColumn : column - 1
         const columnRight = column + 1 > this.lastColumn ? 0 : column + 1
+        neighbourCells = {
+            rowAbove,
+            rowBelow,
+            columnLeft,
+            columnRight
+        }
 
-        return { rowAbove, rowBelow, columnLeft, columnRight }
+        this.neighbourCells.set(id, neighbourCells)
+
+        return neighbourCells
     }
 
     private generateField(size: number): Field
@@ -116,5 +129,5 @@ class GameOfLife {
     }
 }
 
-const game = new GameOfLife(15, 5)
+const game = new GameOfLife(5)
 game.start()
