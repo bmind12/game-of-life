@@ -11,25 +11,25 @@ interface NeighbourCells {
     columnRight: number
 }
 
-class GameOfLife {
+export default class GameOfLife {
     public field: Field
-    private gameSpeed = 2000
+    private gameSpeed: number
     private lastRow: number
     private lastColumn: number
     private neighbourCells: Map<string, NeighbourCells> = new Map()
 
-    constructor(size: number)
-    constructor(height: number, width?: number)
-    constructor(height: number, width = height) {
+    constructor(gameSpeed: number, size: number)
+    constructor(gameSpeed: number, height: number, width?: number)
+    constructor(gameSpeed: number, height: number, width = height) {
         this.field = this.generateField(height, width)
         this.lastRow = Object.keys(this.field).length - 1
         this.lastColumn = Object.keys(this.field[this.lastRow]).length - 1
+        this.gameSpeed = gameSpeed
     }
 
     public start(): void {
         setInterval(() => {
             this.field = this.tick()
-            console.log(this.field)
         }, this.gameSpeed)
     }
 
@@ -128,6 +128,3 @@ class GameOfLife {
         return Math.random() > 0.5
     }
 }
-
-const game = new GameOfLife(5)
-game.start()

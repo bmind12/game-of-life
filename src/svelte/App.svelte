@@ -1,15 +1,49 @@
 <script lang="typescript">
-    let title: string = 'Hello, worldaa'
+    import GameOfLife from '../models/GameOfLife'
+    const speed = 50
 
-    if (typeof title === 'number') {
-        throw new Error()
+    const game = new GameOfLife(speed, 100)
+    let gameFieldRows = formatGameField(game.field)
+
+    function formatGameField(field) {
+        return Object.values(field).map((row) => Object.values(row))
     }
+
+    game.start()
+
+    setInterval(() => {
+        gameFieldRows = formatGameField(game.field)
+    }, speed / 2)
 </script>
 
 <style>
     h1 {
         font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
     }
+
+    .row {
+        margin-bottom: -5px;
+    }
+
+    .cell {
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+        background-color: black;
+        border: 1px solid black;
+    }
+
+    .cell--alive {
+        background-color: white;
+    }
 </style>
 
-<h1>{title}</h1>
+<div class="field">
+    {#each gameFieldRows as items}
+        <div class="row">
+            {#each items as item}
+                <div class="cell" class:cell--alive={item} />
+            {/each}
+        </div>
+    {/each}
+</div>
