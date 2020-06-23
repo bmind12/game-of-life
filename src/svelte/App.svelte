@@ -1,15 +1,17 @@
 <script lang="typescript">
     import GameOfLife from '../models/GameOfLife'
-    const speed = 50
+    const speed = 100
 
-    const game = new GameOfLife(speed, 100)
+    const game = new GameOfLife(speed, 60)
     let gameFieldRows = formatGameField(game.field)
 
     function formatGameField(field) {
         return Object.values(field).map((row) => Object.values(row))
     }
 
-    game.start()
+    function toggleStart() {
+        game.toggleStart()
+    }
 
     setInterval(() => {
         gameFieldRows = formatGameField(game.field)
@@ -46,4 +48,5 @@
             {/each}
         </div>
     {/each}
+    <button on:click={toggleStart}>Resume / Pause game</button>
 </div>

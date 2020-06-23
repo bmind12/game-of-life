@@ -13,24 +13,40 @@ interface NeighbourCells {
 
 export default class GameOfLife {
     public field: Field
-    private gameSpeed: number
+    private speed: number
     private lastRow: number
     private lastColumn: number
     private neighbourCells: Map<string, NeighbourCells> = new Map()
+    private intervalId: number
+    private isStarted = false
 
-    constructor(gameSpeed: number, size: number)
-    constructor(gameSpeed: number, height: number, width?: number)
-    constructor(gameSpeed: number, height: number, width = height) {
+    constructor(speed: number, size: number)
+    constructor(speed: number, height: number, width?: number)
+    constructor(speed: number, height: number, width = height) {
         this.field = this.generateField(height, width)
         this.lastRow = Object.keys(this.field).length - 1
         this.lastColumn = Object.keys(this.field[this.lastRow]).length - 1
-        this.gameSpeed = gameSpeed
+        this.speed = speed
     }
 
-    public start(): void {
-        setInterval(() => {
-            this.field = this.tick()
-        }, this.gameSpeed)
+    public toggleStart(): void {
+        if (this.isStarted) {
+            this.pause()
+        } else {
+            this.intervalId = window.setInterval(() => {
+                this.field = this.tick()
+            }, this.speed)
+            this.isStarted = true
+        }
+    }
+
+    private pause(): void {
+        clearInterval(this.intervalId)
+        this.isStarted = false
+    }
+
+    public changeSpeed(value): void {
+        this.speed = value
     }
 
     private tick = (): Field => {
