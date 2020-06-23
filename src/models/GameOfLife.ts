@@ -33,20 +33,29 @@ export default class GameOfLife {
         if (this.isStarted) {
             this.pause()
         } else {
-            this.intervalId = window.setInterval(() => {
-                this.field = this.tick()
-            }, this.speed)
-            this.isStarted = true
+            this.start()
         }
+    }
+
+    public setSpeed(value: number) {
+        this.speed = value
+
+        if (this.isStarted) {
+            this.pause()
+            this.start()
+        }
+    }
+
+    private start(): void {
+        this.intervalId = window.setInterval(() => {
+            this.field = this.tick()
+        }, this.speed)
+        this.isStarted = true
     }
 
     private pause(): void {
         clearInterval(this.intervalId)
         this.isStarted = false
-    }
-
-    public changeSpeed(value): void {
-        this.speed = value
     }
 
     private tick = (): Field => {
