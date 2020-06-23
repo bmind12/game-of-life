@@ -1,15 +1,21 @@
 <script lang="typescript">
     import GameOfLife from '../models/GameOfLife'
-    const speed = 50
 
-    const game = new GameOfLife(speed, 100)
+    let speed = 100
+    const game = new GameOfLife(speed, 60)
     let gameFieldRows = formatGameField(game.field)
 
     function formatGameField(field) {
         return Object.values(field).map((row) => Object.values(row))
     }
 
-    game.start()
+    function toggleStart() {
+        game.toggleStart()
+    }
+
+    function handleSetSpeed() {
+        game.setSpeed(speed)
+    }
 
     setInterval(() => {
         gameFieldRows = formatGameField(game.field)
@@ -46,4 +52,8 @@
             {/each}
         </div>
     {/each}
+    <button on:click={toggleStart}>Resume / Pause game</button>
+    <label>Speed (ms)</label>
+    <input type="number" bind:value={speed} />
+    <button on:click={handleSetSpeed}>Set</button>
 </div>
