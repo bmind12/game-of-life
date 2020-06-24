@@ -40,6 +40,8 @@ export default class GameOfLife {
     public setSpeed(value: number) {
         this.speed = value
 
+        if (value < 10 || isNaN(value)) return
+
         if (this.isStarted) {
             this.pause()
             this.start()
@@ -65,28 +67,33 @@ export default class GameOfLife {
             newField[row] = {}
 
             for (const column of Object.keys(this.field[row])) {
-                const cell = this.field[row][column]
-                const neighbours = this.getNeighbours(row, column)
-                const aliveNeighbours = neighbours.filter(
-                    (neighbour) => neighbour
-                ).length
-                let newCell = false
-
-                if (cell) {
-                    if (aliveNeighbours === 2 || aliveNeighbours === 3) {
-                        newCell = true
-                    }
-                } else {
-                    if (aliveNeighbours === 3) {
-                        newCell = true
-                    }
-                }
-
-                newField[row][column] = newCell
+                newField[row][column] = this.getNewCell(column, row)
             }
         }
 
         return newField
+    }
+
+    private getNewCell(column: string, row: string) {
+        const cell = this.field[row][column]
+        const neighbours = this.getNeighbours(row, column)
+        const aliveNeighbours = this.getAliveNeighboursCount(neighbours)
+
+        if (cell) {
+            if (aliveNeighbours === 2 || aliveNeighbours === 3) {
+                return true
+            }
+        } else {
+            if (aliveNeighbours === 3) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    private getAliveNeighboursCount(neighbours: Array<boolean>): number {
+        return neighbours.filter((neighbour) => neighbour).length
     }
 
     private getNeighbours(row: string, column: string): Array<boolean> {
@@ -112,7 +119,7 @@ export default class GameOfLife {
     }
 
     private getNeighbourCells(row: number, column: number): NeighbourCells {
-        const id = `${row}${column}`
+        const id = `row:${row}-column${column}`
         let neighbourCells = this.neighbourCells.get(id)
 
         if (neighbourCells) return neighbourCells as NeighbourCells
