@@ -54,6 +54,6 @@
     {/each}
     <button on:click={toggleStart}>Resume / Pause game</button>
     <label>Speed (ms)</label>
-    <input type="number" bind:value={speed} />
+    <input type="number" min="10" max="100000" bind:value={speed} />
     <button on:click={handleSetSpeed}>Set</button>
 </div>

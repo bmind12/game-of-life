@@ -40,6 +40,8 @@ export default class GameOfLife {
     public setSpeed(value: number) {
         this.speed = value
 
+        if (value < 10 || isNaN(value)) return
+
         if (this.isStarted) {
             this.pause()
             this.start()
