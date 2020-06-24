@@ -112,7 +112,7 @@ export default class GameOfLife {
     }
 
     private getNeighbourCells(row: number, column: number): NeighbourCells {
-        const id = `${row}${column}`
+        const id = `row:${row}-column${column}`
         let neighbourCells = this.neighbourCells.get(id)
 
         if (neighbourCells) return neighbourCells as NeighbourCells

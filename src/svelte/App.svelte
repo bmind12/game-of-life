@@ -2,7 +2,7 @@
     import GameOfLife from '../models/GameOfLife'
 
     let speed = 100
-    const game = new GameOfLife(speed, 60)
+    const game = new GameOfLife(speed, 50)
     let gameFieldRows = formatGameField(game.field)
 
     function formatGameField(field) {
