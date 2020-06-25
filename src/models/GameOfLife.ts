@@ -1,3 +1,6 @@
+import Eventing from './Eventing'
+
+// TODO: create types.d.ts and add strict check
 interface Field {
     [row: string]: {
         [column: string]: boolean
@@ -11,22 +14,44 @@ interface NeighbourCells {
     columnRight: number
 }
 
+interface GameData {
+    speed: number
+    density: number
+    size?: number
+    height?: number
+    width?: number
+}
+
 export default class GameOfLife {
     public field: Field
     private speed: number
+    private height: number
+    private width: number
+    private density: number
     private lastRow: number
     private lastColumn: number
     private neighbourCells: Map<string, NeighbourCells> = new Map()
     private intervalId: number
+    private currentRow: number
+    private currentCol: number
+    private isGenerated = false
     private isStarted = false
+    private events = new Eventing()
 
-    constructor(speed: number, size: number)
-    constructor(speed: number, height: number, width?: number)
-    constructor(speed: number, height: number, width = height) {
-        this.field = this.generateField(height, width)
+    constructor({
+        speed,
+        size,
+        height = size,
+        width = height,
+        density
+    }: GameData) {
+        this.initEventListeners()
+        this.setSpeed(speed)
+        this.setSize(height, width)
+        this.setDensity(density)
+        this.generateField(this.getRandomCell)
         this.lastRow = Object.keys(this.field).length - 1
         this.lastColumn = Object.keys(this.field[this.lastRow]).length - 1
-        this.speed = speed
     }
 
     public toggleStart(): void {
@@ -37,20 +62,50 @@ export default class GameOfLife {
         }
     }
 
-    public setSpeed(value: number) {
-        this.speed = value
-
+    public setSpeed(value: number): void {
         if (value < 10 || isNaN(value)) return
 
+        this.speed = value
+
+        this.emit('update:speed')
+    }
+
+    public setDensity(value: number): void {
+        if (value < 0 || value > 1) return
+
+        this.density = value
+
+        this.emit('update:density')
+    }
+
+    public setSize(height: number, width = height): void {
+        if (height <= 0 || width <= 0) return // TODO: add proper error handling
+
+        this.height = height
+        this.width = width
+    }
+
+    private initEventListeners(): void {
+        this.on('update:speed', this.onSpeedUpdate)
+        this.on('update:density', this.onDensityUpdate)
+    }
+
+    private onSpeedUpdate = (): void => {
         if (this.isStarted) {
             this.pause()
             this.start()
         }
     }
 
+    private onDensityUpdate = (): void => {
+        if (this.isGenerated && !this.isStarted) {
+            this.generateField(this.getRandomCell)
+        }
+    }
+
     private start(): void {
         this.intervalId = window.setInterval(() => {
-            this.field = this.tick()
+            this.generateField(this.getNewCell)
         }, this.speed)
         this.isStarted = true
     }
@@ -60,23 +115,13 @@ export default class GameOfLife {
         this.isStarted = false
     }
 
-    private tick = (): Field => {
-        const newField: Field = {}
-
-        for (const row of Object.keys(this.field)) {
-            newField[row] = {}
-
-            for (const column of Object.keys(this.field[row])) {
-                newField[row][column] = this.getNewCell(column, row)
-            }
-        }
-
-        return newField
+    private getRandomCell = (): boolean => {
+        return Math.random() < this.density
     }
 
-    private getNewCell(column: string, row: string) {
-        const cell = this.field[row][column]
-        const neighbours = this.getNeighbours(row, column)
+    private getNewCell = () => {
+        const cell = this.field[this.currentRow][this.currentCol]
+        const neighbours = this.getNeighbours()
         const aliveNeighbours = this.getAliveNeighboursCount(neighbours)
 
         if (cell) {
@@ -96,22 +141,22 @@ export default class GameOfLife {
         return neighbours.filter((neighbour) => neighbour).length
     }
 
-    private getNeighbours(row: string, column: string): Array<boolean> {
+    private getNeighbours(): Array<boolean> {
         const {
             rowAbove,
             rowBelow,
             columnLeft,
             columnRight
-        } = this.getNeighbourCells(+row, +column)
+        } = this.getNeighbourCells(+this.currentRow, +this.currentCol)
 
         const neighbours = [
             this.field[rowAbove][columnLeft],
-            this.field[rowAbove][column],
+            this.field[rowAbove][this.currentCol],
             this.field[rowAbove][columnRight],
-            this.field[row][columnLeft],
-            this.field[row][columnRight],
+            this.field[this.currentRow][columnLeft],
+            this.field[this.currentRow][columnRight],
             this.field[rowBelow][columnLeft],
-            this.field[rowBelow][column],
+            this.field[rowBelow][this.currentCol],
             this.field[rowBelow][columnRight]
         ]
 
@@ -122,7 +167,7 @@ export default class GameOfLife {
         const id = `row:${row}-column${column}`
         let neighbourCells = this.neighbourCells.get(id)
 
-        if (neighbourCells) return neighbourCells as NeighbourCells
+        if (neighbourCells) return neighbourCells
 
         const rowAbove = row - 1 < 0 ? this.lastRow : row - 1
         const rowBelow = row + 1 > this.lastRow ? 0 : row + 1
@@ -140,23 +185,28 @@ export default class GameOfLife {
         return neighbourCells
     }
 
-    private generateField(size: number): Field
-    private generateField(height: number, width?: number): Field
-    private generateField(height: number, width = height): Field {
+    private generateField = (getCell: Function): void => {
         const field: Field = {}
 
-        for (let i = 0; i < height; i++) {
+        for (let i = 0; i < this.height; i++) {
             field[i] = {}
+            this.currentRow = i
 
-            for (let j = 0; j < width; j++) {
-                field[i][j] = this.getRandomValue()
+            for (let j = 0; j < this.width; j++) {
+                this.currentCol = j
+                field[i][j] = getCell()
             }
         }
 
-        return field
+        this.field = field
+        this.isGenerated = true
     }
 
-    private getRandomValue(): boolean {
-        return Math.random() > 0.5
+    private get on() {
+        return this.events.on
+    }
+
+    private get emit() {
+        return this.events.emit
     }
 }
