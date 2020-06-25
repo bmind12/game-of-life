@@ -1,3 +1,6 @@
+import Eventing from './Eventing'
+
+// TODO: create types.d.ts and add strict check
 interface Field {
     [row: string]: {
         [column: string]: boolean
@@ -33,6 +36,7 @@ export default class GameOfLife {
     private currentCol: number
     private isGenerated = false
     private isStarted = false
+    private events = new Eventing()
 
     constructor({
         speed,
@@ -41,6 +45,7 @@ export default class GameOfLife {
         width = height,
         density
     }: GameData) {
+        this.initEventListeners()
         this.setSpeed(speed)
         this.setSize(height, width)
         this.setDensity(density)
@@ -62,21 +67,15 @@ export default class GameOfLife {
 
         this.speed = value
 
-        // TODO: add eventing
-        if (this.isStarted) {
-            this.pause()
-            this.start()
-        }
+        this.emit('update:speed')
     }
 
     public setDensity(value: number): void {
-        if (value >= 0 && value <= 1) {
-            this.density = value
-        }
+        if (value < 0 || value > 1) return
 
-        if (this.isGenerated && !this.isStarted) {
-            this.generateField(this.getRandomCell)
-        }
+        this.density = value
+
+        this.emit('update:density')
     }
 
     public setSize(height: number, width = height): void {
@@ -84,6 +83,24 @@ export default class GameOfLife {
 
         this.height = height
         this.width = width
+    }
+
+    private initEventListeners(): void {
+        this.on('update:speed', this.onSpeedUpdate)
+        this.on('update:density', this.onDensityUpdate)
+    }
+
+    private onSpeedUpdate = (): void => {
+        if (this.isStarted) {
+            this.pause()
+            this.start()
+        }
+    }
+
+    private onDensityUpdate = (): void => {
+        if (this.isGenerated && !this.isStarted) {
+            this.generateField(this.getRandomCell)
+        }
     }
 
     private start(): void {
@@ -183,5 +200,13 @@ export default class GameOfLife {
 
         this.field = field
         this.isGenerated = true
+    }
+
+    private get on() {
+        return this.events.on
+    }
+
+    private get emit() {
+        return this.events.emit
     }
 }
