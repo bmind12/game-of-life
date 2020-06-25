@@ -31,6 +31,7 @@ export default class GameOfLife {
     private intervalId: number
     private currentRow: number
     private currentCol: number
+    private isGenerated = false
     private isStarted = false
 
     constructor({
@@ -71,6 +72,10 @@ export default class GameOfLife {
     public setDensity(value: number): void {
         if (value >= 0 && value <= 1) {
             this.density = value
+        }
+
+        if (this.isGenerated && !this.isStarted) {
+            this.generateField(this.getRandomCell)
         }
     }
 
@@ -177,5 +182,6 @@ export default class GameOfLife {
         }
 
         this.field = field
+        this.isGenerated = true
     }
 }
