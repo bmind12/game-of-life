@@ -23,17 +23,17 @@ interface GameData {
 }
 
 export default class GameOfLife {
-    public field: Field
-    private speed: number
-    private height: number
-    private width: number
-    private density: number
+    public field!: Field
+    private speed!: number
+    private height!: number
+    private width!: number
+    private density!: number
     private lastRow: number
     private lastColumn: number
     private neighbourCells: Map<string, NeighbourCells> = new Map()
-    private intervalId: number
-    private currentRow: number
-    private currentCol: number
+    private intervalId!: number
+    private currentRow!: number
+    private currentCol!: number
     private isGenerated = false
     private isStarted = false
     private events = new Eventing()
@@ -41,7 +41,7 @@ export default class GameOfLife {
     constructor({
         speed,
         size,
-        height = size,
+        height = size || 30,
         width = height,
         density
     }: GameData) {

@@ -3,10 +3,9 @@ interface Events {
 }
 
 export default class Eventing {
-    private events: Events
+    private events!: Events
 
     public on(eventName: string, callback: Function): void {
-        console.log('### on', this)
         if (!this.events[eventName]) this.events[eventName] = []
 
         this.events[eventName].push(callback)
