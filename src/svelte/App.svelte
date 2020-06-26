@@ -1,6 +1,12 @@
 <script lang="typescript">
     import GameOfLife from '../models/GameOfLife'
 
+    interface Field {
+        [row: string]: {
+            [column: string]: boolean
+        }
+    }
+
     let speed = 100
     let density = 50
     let size = 50
@@ -8,7 +14,7 @@
     const game = new GameOfLife({ density: density / 100, speed, size })
     let gameFieldRows = formatGameField(game.field)
 
-    function formatGameField(field) {
+    function formatGameField(field: Field) {
         return Object.values(field).map((row) => Object.values(row))
     }
 
