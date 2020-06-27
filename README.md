@@ -4,7 +4,7 @@ Yet another implementation of this beautiful game. This time using Svelte framew
 
 ### Future improvements:
 
--   `strict` typechicking
+-   Testing coverage
 -   Better architucture
 -   UX improvements
 -   UI improvements
